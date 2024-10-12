@@ -18,10 +18,11 @@ def track_balls():
     balls = data['balls']
 
     # Prepare detections in DeepSORT's expected format (xywh format)
-    detections = np.array([[ball['x'], ball['y'], ball['w'], ball['h']] for ball in balls])
+    detections = [([ball['x1'], ball['y1'], ball['x2'], ball['y2']], 1, "ball") for ball in balls]
+    print(detections)
 
     # Run DeepSORT tracking
-    tracking_results = tracker.update_tracks(raw_detections=detections, frame=frame)  # frame_id for frame referencing
+    tracking_results = tracker.update_tracks(raw_detections=detections, embeds=[])  # frame_id for frame referencing
 
     # Collect results
     tracked_balls = []
@@ -29,10 +30,10 @@ def track_balls():
         if track.is_confirmed():  # Only return confirmed tracks
             tracked_balls.append({
                 "id": track.track_id,
-                "x": int(track.to_tlbr()[0]),
-                "y": int(track.to_tlbr()[1]),
-                "w": int(track.to_tlbr()[2] - track.to_tlbr()[0]),
-                "h": int(track.to_tlbr()[3] - track.to_tlbr()[1]),
+                "x1": int(track.to_tlbr()[0]),
+                "y1": int(track.to_tlbr()[1]),
+                "x2": int(track.to_tlbr()[2] - track.to_tlbr()[0]),
+                "y2": int(track.to_tlbr()[3] - track.to_tlbr()[1]),
             })
 
     return jsonify({"frame": frame, "tracked_balls": tracked_balls})
